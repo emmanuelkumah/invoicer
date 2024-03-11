@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@styles/globals.css";
+import Nav from "@components/Nav";
 
 export const metadata: Metadata = {
   title: "Invoicer",
@@ -18,7 +19,10 @@ export default function RootLayout({
           {" "}
           <div className="gradient" />{" "}
         </div>
-        <main className="app">{children}</main>
+        <main className="app">
+          <Nav />
+          {children}
+        </main>
       </body>
     </html>
   );
