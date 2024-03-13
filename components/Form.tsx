@@ -12,6 +12,9 @@ import { useState, useRef } from "react";
 
 const Form = () => {
   const [invNumber, setInvNumber] = useState(0);
+  const [invDate, setInvDate] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState("$");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const getLogo = (file: File) => {
@@ -41,9 +44,12 @@ const Form = () => {
         )}
         <InvoiceNumber invNumber={invNumber} setInvNumber={setInvNumber} />
 
-        <InvoiceDate />
-        <InvoiceDueDate />
-        <InvoiceCurrency />
+        <InvoiceDate invDate={invDate} setInvDate={setInvDate} />
+        <InvoiceDueDate dueDate={dueDate} setDueDate={setDueDate} />
+        <InvoiceCurrency
+          selectedCurrency={selectedCurrency}
+          setSelectedCurrency={setSelectedCurrency}
+        />
       </section>
       <section>
         <h3 className="mt-9 pb-2">Business Details</h3>

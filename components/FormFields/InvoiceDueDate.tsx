@@ -1,6 +1,11 @@
 import React from "react";
 
-const InvoiceDueDate = () => {
+interface DueDateProps {
+  dueDate: string;
+  setDueDate: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const InvoiceDueDate: React.FC<DueDateProps> = ({ dueDate, setDueDate }) => {
   return (
     <section className="my-2">
       <label
@@ -24,9 +29,13 @@ const InvoiceDueDate = () => {
         </div>
         <input
           type="date"
+          min="2024-01-31"
+          step="1"
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Select due date"
           id="invoiceDueDate"
+          value={dueDate}
+          onChange={(event) => setDueDate(event.target.value)}
         />
       </div>
     </section>

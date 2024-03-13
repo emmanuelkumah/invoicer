@@ -1,6 +1,14 @@
 import React from "react";
 
-const InvoiceCurrency = () => {
+interface CurrencyProps {
+  selectedCurrency: string;
+  setSelectedCurrency: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const InvoiceCurrency: React.FC<CurrencyProps> = ({
+  selectedCurrency,
+  setSelectedCurrency,
+}) => {
   return (
     <section className="my-2">
       <label
@@ -12,6 +20,8 @@ const InvoiceCurrency = () => {
       <select
         id="currency"
         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        value={selectedCurrency}
+        onChange={(e) => setSelectedCurrency(e.target.value)}
       >
         <option defaultValue="GH₵">Choose a currency</option>
         <option value="$">US$</option>
