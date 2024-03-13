@@ -1,3 +1,5 @@
+"use client";
+import DisplayLogo from "./DisplayLogo";
 import InvoiceClient from "./FormFields/InvoiceClient";
 import InvoiceCurrency from "./FormFields/InvoiceCurrency";
 import InvoiceDate from "./FormFields/InvoiceDate";
@@ -6,14 +8,39 @@ import InvoiceItem from "./FormFields/InvoiceItem";
 import InvoiceNumber from "./FormFields/InvoiceNumber";
 import InvoiceProvider from "./FormFields/InvoiceProvider";
 import InvoiceTotal from "./FormFields/InvoiceTotal";
+import { useState, useRef } from "react";
 
 const Form = () => {
+  const [invNumber, setInvNumber] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
+  const getLogo = (file: File) => {
+    setSelectedImage(file);
+  };
+
   return (
     <form className="bg-white p-5 w-full rounded-lg drop-shadow-lg sm:w-[80%]">
       <section className="grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 sm:grid-cols-5">
-        <section>Logo 3</section>
+        {selectedImage ? (
+          <div>
+            <img
+              alt="Logo"
+              width="100%"
+              src={URL.createObjectURL(selectedImage)}
+            />
+            <br />
+            <button
+              className="bg-slate-400 p-2 rounded-md hover:bg-slate-600"
+              onClick={() => setSelectedImage(null)}
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <DisplayLogo getLogo={getLogo} />
+        )}
+        <InvoiceNumber invNumber={invNumber} setInvNumber={setInvNumber} />
 
-        <InvoiceNumber />
         <InvoiceDate />
         <InvoiceDueDate />
         <InvoiceCurrency />
