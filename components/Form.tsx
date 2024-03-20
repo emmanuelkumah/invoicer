@@ -1,5 +1,7 @@
 "use client";
+import { v4 as uuidv4 } from "uuid";
 import DisplayLogo from "./DisplayLogo";
+import AddDynamicInvoiceItem from "./FormFields/AddDynamicInvoiceItem";
 import InvoiceClient from "./FormFields/InvoiceClient";
 import InvoiceCurrency from "./FormFields/InvoiceCurrency";
 import InvoiceDate from "./FormFields/InvoiceDate";
@@ -8,7 +10,13 @@ import InvoiceItem from "./FormFields/InvoiceItem";
 import InvoiceNumber from "./FormFields/InvoiceNumber";
 import InvoiceProvider from "./FormFields/InvoiceProvider";
 import InvoiceTotal from "./FormFields/InvoiceTotal";
-import { useState, useRef } from "react";
+import { useState } from "react";
+
+interface InvoiceItem {
+  description: string;
+  quantity: number;
+  cost: number;
+}
 
 const Form = () => {
   const [invNumber, setInvNumber] = useState(0);
@@ -16,13 +24,47 @@ const Form = () => {
   const [dueDate, setDueDate] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("$");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [businessDetails, setBusinessDetails] = useState({
+    serviceProvider: "",
+    client: "",
+  });
+
+  const [invItems, setInvItems] = useState<InvoiceItem[]>([
+    { description: "", quantity: 0, cost: 0 },
+  ]);
 
   const getLogo = (file: File) => {
     setSelectedImage(file);
   };
 
+  const handleAddNewInvoiceItem = () => {
+    setInvItems([...invItems, { description: "", quantity: 0, cost: 0 }]);
+  };
+
+  const handleInvoiceItemChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const { name, value } = event.target;
+
+    setInvItems((prevItems) => {
+      const newItems = [...prevItems];
+      newItems[index] = {
+        ...newItems[index],
+        [name]:
+          name === "quantity" || name === "cost" ? parseFloat(value) : value,
+      };
+      return newItems;
+    });
+  };
+  const handleFormSubmission = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
   return (
-    <form className="bg-white p-5 w-full rounded-lg drop-shadow-lg sm:w-[80%]">
+    <form
+      className="bg-white p-5 w-full rounded-lg drop-shadow-lg sm:w-[80%]"
+      onSubmit={handleFormSubmission}
+    >
       <section className="grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 sm:grid-cols-5">
         {selectedImage ? (
           <div>
@@ -55,14 +97,82 @@ const Form = () => {
         <h3 className="mt-9 pb-2">Business Details</h3>
 
         <div className="grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 sm:grid-cols-2">
-          <InvoiceProvider />
-          <InvoiceClient />
+          <InvoiceProvider
+            businessDetails={businessDetails}
+            setBusinessDetails={setBusinessDetails}
+          />
+          <InvoiceClient
+            businessDetails={businessDetails}
+            setBusinessDetails={setBusinessDetails}
+          />
         </div>
       </section>
       <section>
         <h3 className="mt-9 pb-2">Item Details</h3>
-        <InvoiceItem />
-        <button className="bg-cyan-800 text-white p-2 rounded-lg mt-4">
+        {invItems.map((item, index) => (
+          <div
+            className="grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 mt-6 sm:grid-cols-6"
+            key={index}
+          >
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="item"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Item
+              </label>
+              <input
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                type="text"
+                id="item"
+                name="description"
+                value={item.description}
+                onChange={(event) => handleInvoiceItemChange(event, index)}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="quantity"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Quantity
+              </label>
+              <input
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={item.quantity}
+                onChange={(event) => handleInvoiceItemChange(event, index)}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="cost"
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Cost
+              </label>
+              <input
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                type="number"
+                id="cost"
+                name="cost"
+                value={item.cost}
+                onChange={(event) => handleInvoiceItemChange(event, index)}
+              />
+            </div>
+            <div>
+              <h3>Amount</h3>
+              <h4>USD 5000</h4>
+            </div>
+          </div>
+        ))}
+
+        <button
+          className="bg-cyan-800 text-white p-2 rounded-lg mt-4"
+          onClick={handleAddNewInvoiceItem}
+        >
           Add Item
         </button>
       </section>

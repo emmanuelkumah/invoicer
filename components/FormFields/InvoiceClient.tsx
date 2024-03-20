@@ -1,6 +1,22 @@
-import React from "react";
+type ClientProps = {
+  businessDetails: {
+    client: string;
+    serviceProvider: string;
+  };
+  setBusinessDetails: React.Dispatch<
+    React.SetStateAction<{ serviceProvider: string; client: string }>
+  >;
+};
 
-const InvoiceClient = () => {
+const InvoiceClient: React.FC<ClientProps> = ({
+  businessDetails,
+  setBusinessDetails,
+}) => {
+  const handleClientNameChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setBusinessDetails({ ...businessDetails, client: event.target.value });
+  };
   return (
     <div>
       <label
@@ -23,9 +39,12 @@ const InvoiceClient = () => {
         </span>
         <input
           type="text"
+          autoFocus
           id="client"
           className="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Enter client name"
+          value={businessDetails.client}
+          onChange={handleClientNameChange}
         />
       </div>
     </div>

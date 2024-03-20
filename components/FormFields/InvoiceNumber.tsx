@@ -35,6 +35,7 @@ const InvoiceNumber: React.FC<ChildProps> = ({ invNumber, setInvNumber }) => {
         </span>
         <input
           type="number"
+          autoFocus
           min="0"
           step="1"
           id="number-input"
