@@ -1,12 +1,16 @@
 import React from "react";
 
-const InvoiceTotal = () => {
+const InvoiceTotal = ({
+  subTotal,
+  selectedCurrency,
+}: {
+  subTotal: number;
+  selectedCurrency: string;
+}) => {
   return (
     <div>
-      <div className="flex flex-row justify-between">
-        <h3>Sub Total</h3>
-        <p>Amount</p>
-      </div>
+      <h3>{`Subtotal is:  ${selectedCurrency} ${subTotal.toFixed(2)}`}</h3>
+
       <div className="flex flex-row gap-4">
         <section className="my-2">
           <label

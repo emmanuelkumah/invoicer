@@ -10,7 +10,8 @@ import InvoiceItem from "./FormFields/InvoiceItem";
 import InvoiceNumber from "./FormFields/InvoiceNumber";
 import InvoiceProvider from "./FormFields/InvoiceProvider";
 import InvoiceTotal from "./FormFields/InvoiceTotal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { subtle } from "crypto";
 
 interface InvoiceItem {
   description: string;
@@ -33,7 +34,9 @@ const Form = () => {
     { description: "", quantity: 0, cost: 0 },
   ]);
 
-  const getLogo = (file: File) => {
+  console.log(invItems);
+
+  const uploadCompanyLogo = (file: File) => {
     setSelectedImage(file);
   };
 
@@ -51,12 +54,19 @@ const Form = () => {
       const newItems = [...prevItems];
       newItems[index] = {
         ...newItems[index],
-        [name]:
-          name === "quantity" || name === "cost" ? parseFloat(value) : value,
+        [name]: name === "quantity" || name === "cost" ? Number(value) : value,
       };
       return newItems;
     });
   };
+
+  const calculateAmount = (invQuantity: number, invCost: number) => {
+    return (invQuantity * invCost).toFixed(2);
+  };
+
+  const subTotal = invItems.reduce((accumulator, currItem) => {
+    return accumulator + currItem.cost * currItem.quantity;
+  }, 0);
   const handleFormSubmission = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   };
@@ -82,7 +92,7 @@ const Form = () => {
             </button>
           </div>
         ) : (
-          <DisplayLogo getLogo={getLogo} />
+          <DisplayLogo uploadCompanyLogo={uploadCompanyLogo} />
         )}
         <InvoiceNumber invNumber={invNumber} setInvNumber={setInvNumber} />
 
@@ -125,6 +135,7 @@ const Form = () => {
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 type="text"
                 id="item"
+                required
                 name="description"
                 value={item.description}
                 onChange={(event) => handleInvoiceItemChange(event, index)}
@@ -140,6 +151,8 @@ const Form = () => {
               <input
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 type="number"
+                min="1"
+                step="1"
                 id="quantity"
                 name="quantity"
                 value={item.quantity}
@@ -156,6 +169,8 @@ const Form = () => {
               <input
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 type="number"
+                min="1"
+                step="1"
                 id="cost"
                 name="cost"
                 value={item.cost}
@@ -164,7 +179,10 @@ const Form = () => {
             </div>
             <div>
               <h3>Amount</h3>
-              <h4>USD 5000</h4>
+              <h4>{`${selectedCurrency} ${calculateAmount(
+                item.quantity,
+                item.cost
+              )}`}</h4>
             </div>
           </div>
         ))}
@@ -176,7 +194,7 @@ const Form = () => {
           Add Item
         </button>
       </section>
-      <InvoiceTotal />
+      <InvoiceTotal subTotal={subTotal} selectedCurrency={selectedCurrency} />
       <section className="flex flex-row gap-4 mt-4 sm:gap-8 sm:my-8">
         <button className="bg-stone-300	 rounded-xl p-3 text-cyan-900 text-xl w-full sm:w-[20%]">
           Preview

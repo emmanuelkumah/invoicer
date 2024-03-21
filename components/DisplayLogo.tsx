@@ -1,7 +1,7 @@
-const DisplayLogo = ({ getLogo }: { getLogo: any }) => {
+const DisplayLogo = ({ uploadCompanyLogo }: { uploadCompanyLogo: any }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      getLogo(event.target.files[0]);
+      uploadCompanyLogo(event.target.files[0]);
     }
   };
 
