@@ -34,7 +34,7 @@ const Form = () => {
   const [invItems, setInvItems] = useState<InvoiceItem[]>([
     { description: "", quantity: 0, cost: 0 },
   ]);
-  const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const uploadCompanyLogo = (file: File) => {
     setSelectedImage(file);
@@ -44,6 +44,11 @@ const Form = () => {
     setInvItems([...invItems, { description: "", quantity: 0, cost: 0 }]);
   };
 
+  const handleDeleteInvoiceItem = (index: number) => {
+    const updatedItems = [...invItems];
+    updatedItems.splice(index, 1);
+    setInvItems(updatedItems);
+  };
   const handleInvoiceItemChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     index: number
@@ -105,15 +110,15 @@ const Form = () => {
         {selectedImage ? (
           <div
             className="relative"
-            onMouseEnter={() => setIsLogoHovered(true)}
-            onMouseLeave={() => setIsLogoHovered(false)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             <img
               alt="Logo"
               width="100%"
               src={URL.createObjectURL(selectedImage)}
             />
-            {isLogoHovered && (
+            {isHovered && (
               <div
                 className="absolute top-[2%] right-[20%] bg-slate-50 rounded-md p-2"
                 onClick={() => setSelectedImage(null)}
@@ -165,8 +170,10 @@ const Form = () => {
         <h3 className="mt-9 pb-2">Item Details</h3>
         {invItems.map((item, index) => (
           <div
-            className="grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 mt-6 sm:grid-cols-6"
+            className="relative grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 mt-6 sm:grid-cols-6"
             key={index}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             <div className="sm:col-span-3">
               <label
@@ -228,6 +235,25 @@ const Form = () => {
                 item.cost
               )}`}</h4>
             </div>
+            {isHovered && (
+              <div
+                className="absolute right-[10%] top-2"
+                onClick={() => handleDeleteInvoiceItem(index)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-6 h-6 text-red-500"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            )}
           </div>
         ))}
 
