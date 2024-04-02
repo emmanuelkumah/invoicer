@@ -1,11 +1,23 @@
 import React from "react";
 
-const InvoiceTotal = ({
-  subTotal,
-  selectedCurrency,
-}: {
+interface InvoiceTotalProps {
   subTotal: number;
   selectedCurrency: string;
+  tax: string;
+  setTax: React.Dispatch<React.SetStateAction<string>>;
+  discount: string;
+  setDiscount: React.Dispatch<React.SetStateAction<string>>;
+  totalAmount: number;
+}
+
+const InvoiceTotal: React.FC<InvoiceTotalProps> = ({
+  subTotal,
+  selectedCurrency,
+  tax,
+  setTax,
+  totalAmount,
+  discount,
+  setDiscount,
 }) => {
   return (
     <div>
@@ -14,7 +26,7 @@ const InvoiceTotal = ({
       <div className="flex flex-row gap-4">
         <section className="my-2">
           <label
-            htmlFor="number-input"
+            htmlFor="tax-input"
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
             Tax
@@ -40,10 +52,12 @@ const InvoiceTotal = ({
               </svg>
             </span>
             <input
-              type="number"
-              id="number-input"
+              type="text"
+              id="tax-input"
               className="rounded-none rounded-e-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="1"
+              placeholder="Enter tax"
+              value={tax}
+              onChange={(event) => setTax(event?.target.value)}
             />
           </div>
         </section>{" "}
@@ -75,17 +89,19 @@ const InvoiceTotal = ({
               </svg>
             </span>
             <input
-              type="number"
-              id="number-input"
+              type="text"
+              id="discount-input"
               className="rounded-none rounded-e-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="1"
+              placeholder="Enter discount"
+              value={discount}
+              onChange={(event) => setDiscount(event.target.value)}
             />
           </div>
         </section>
       </div>
       <section className="flex  justify-between items-center">
         <h3>Total </h3>
-        <p>Amount</p>
+        <p>{`${selectedCurrency}${totalAmount.toFixed(2)}`}</p>
       </section>
     </div>
   );
