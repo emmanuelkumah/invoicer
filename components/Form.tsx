@@ -14,6 +14,7 @@ import InvoiceTotal from "./FormFields/InvoiceTotal";
 import { Button, Modal } from "flowbite-react";
 
 import { useState } from "react";
+import InvoiceModal from "./InvoiceModal";
 
 interface InvoiceItem {
   description: string;
@@ -39,11 +40,13 @@ const Form = () => {
     { description: "", quantity: 0, cost: 0 },
   ]);
   const [isHovered, setIsHovered] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
 
   const uploadCompanyLogo = (file: File) => {
     setSelectedImage(file);
   };
+
+  let submittedInvoiceDetails;
 
   const handleAddNewInvoiceItem = () => {
     setInvItems([...invItems, { description: "", quantity: 0, cost: 0 }]);
@@ -97,11 +100,23 @@ const Form = () => {
   const salesTaxAmount = (Number(tax) / 100) * subTotal;
   const totalAmountDue = totalAfterDiscount + salesTaxAmount;
 
+  const handleInvoiceSubmission = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    submittedInvoiceDetails = {
+      invDate: invDate,
+      invNumber: invNumber,
+      invItems: invItems,
+      businessDetails: businessDetails,
+    };
+    setOpenModal(true);
+  };
+
   return (
     <>
       <form
         className="bg-white p-5 w-full rounded-lg drop-shadow-lg sm:w-[80%]"
         id="invoiceContent"
+        onSubmit={(event) => handleInvoiceSubmission(event)}
       >
         <div className="grid place-items-center my-5">
           <input
@@ -281,14 +296,32 @@ const Form = () => {
           setDiscount={setDiscount}
           totalAmount={totalAmountDue}
         />
+        {/* <button className="bg-teal-500">Preview Invoice</button> */}
       </form>
-
+      <button onClick={() => setOpenModal(true)}>Preview invoice</button>
       <button
         className="bg-cyan-900 rounded-xl p-3 text-white text-xl w-full sm:w-[20%]"
         onClick={downloadInvoiceAsPDF}
       >
         Download Invoice{" "}
       </button>
+      {openModal && (
+        <InvoiceModal
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          invItems={invItems}
+          subTotal={subTotal}
+          totalAmount={totalAmountDue}
+          discount={discountAmount}
+          taxAmount={salesTaxAmount}
+          selectedCurrency={selectedCurrency}
+          selectedImage={selectedImage}
+          businessDetails={businessDetails}
+          invNumber={invNumber}
+          invDate={invDate}
+          dueDate={dueDate}
+        />
+      )}
     </>
   );
 };
