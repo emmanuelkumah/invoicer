@@ -1,7 +1,6 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+
 import DisplayLogo from "./DisplayLogo";
 import InvoiceClient from "./FormFields/InvoiceClient";
 import InvoiceCurrency from "./FormFields/InvoiceCurrency";
@@ -73,20 +72,6 @@ const Form = () => {
     });
   };
 
-  const downloadInvoiceAsPDF = () => {
-    const invoiceInputs: any = document.getElementById("invoiceContent");
-
-    html2canvas(invoiceInputs).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("invoice.pdf");
-    });
-  };
-
   const calculateAmount = (invQuantity: number, invCost: number) => {
     return (invQuantity * invCost).toFixed(2);
   };
@@ -115,7 +100,6 @@ const Form = () => {
     <>
       <form
         className="bg-white p-5 w-full rounded-lg drop-shadow-lg sm:w-[80%]"
-        id="invoiceContent"
         onSubmit={(event) => handleInvoiceSubmission(event)}
       >
         <div className="grid place-items-center my-5">
@@ -299,12 +283,12 @@ const Form = () => {
         {/* <button className="bg-teal-500">Preview Invoice</button> */}
       </form>
       <button onClick={() => setOpenModal(true)}>Preview invoice</button>
-      <button
+      {/* <button
         className="bg-cyan-900 rounded-xl p-3 text-white text-xl w-full sm:w-[20%]"
         onClick={downloadInvoiceAsPDF}
       >
         Download Invoice{" "}
-      </button>
+      </button> */}
       {openModal && (
         <InvoiceModal
           openModal={openModal}

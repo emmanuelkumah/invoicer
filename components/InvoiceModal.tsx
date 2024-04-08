@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, Modal, Table } from "flowbite-react";
-import { useState } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface ModalProps {
   openModal: boolean;
@@ -33,12 +34,26 @@ const InvoiceModal: React.FC<ModalProps> = ({
   invDate,
   dueDate,
 }) => {
+  const downloadInvoiceAsPDF = () => {
+    const invoiceInputs: any = document.getElementById("invoiceContent");
+
+    html2canvas(invoiceInputs).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("invoice.pdf");
+    });
+    setOpenModal(false);
+  };
   return (
     <>
       <Modal show={openModal} onClose={() => setOpenModal(false)}>
         <Modal.Header>Invoice Details</Modal.Header>
         <Modal.Body>
-          <div>
+          <div id="invoiceContent" className="p-5">
             <div className="flex flex-row justify-between">
               <img
                 alt="Logo"
@@ -54,13 +69,13 @@ const InvoiceModal: React.FC<ModalProps> = ({
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between my-5 bg-slate-300 rounded-md p-2">
-              <p className="text-xl font-light">
+              <p className="text-xl font-light pb-4">
                 From:
                 <span className="px-2 font-semibold">
                   {businessDetails.serviceProvider}
                 </span>
               </p>
-              <p className="text-xl font-light">
+              <p className="text-xl font-light pb-4">
                 Bill to:
                 <span className="px-2 font-semibold">
                   {businessDetails.client}
@@ -132,7 +147,7 @@ const InvoiceModal: React.FC<ModalProps> = ({
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={() => setOpenModal(false)}>Download </Button>
+          <Button onClick={downloadInvoiceAsPDF}>Download </Button>
           <Button color="gray" onClick={() => setOpenModal(false)}>
             Decline
           </Button>
