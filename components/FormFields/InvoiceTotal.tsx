@@ -1,4 +1,6 @@
 import React from "react";
+import { Label, TextInput } from "flowbite-react";
+import { AiOutlinePercentage } from "react-icons/ai";
 
 interface InvoiceTotalProps {
   subTotal: number;
@@ -25,13 +27,17 @@ const InvoiceTotal: React.FC<InvoiceTotalProps> = ({
 
       <div className="flex flex-row gap-4">
         <section className="my-2">
-          <label
-            htmlFor="tax-input"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
-            Tax
-          </label>
-          <div className="flex">
+          <Label htmlFor="tax" value="Tax Percentage" />
+
+          <TextInput
+            id="tax"
+            type="number"
+            icon={AiOutlinePercentage}
+            value={tax}
+            onChange={(event) => setTax(event?.target.value)}
+          />
+
+          {/* <div className="flex">
             <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-e-0 border-gray-300 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
               <svg
                 className="w-6 h-6 text-gray-800 dark:text-white"
@@ -59,10 +65,19 @@ const InvoiceTotal: React.FC<InvoiceTotalProps> = ({
               value={tax}
               onChange={(event) => setTax(event?.target.value)}
             />
-          </div>
+          </div> */}
         </section>{" "}
         <section className="my-2">
-          <label
+          <Label htmlFor="discount" value="Discount Percentage" />
+
+          <TextInput
+            id="discount"
+            type="number"
+            icon={AiOutlinePercentage}
+            value={discount}
+            onChange={(event) => setDiscount(event?.target.value)}
+          />
+          {/* <label
             htmlFor="number-input"
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
@@ -96,7 +111,7 @@ const InvoiceTotal: React.FC<InvoiceTotalProps> = ({
               value={discount}
               onChange={(event) => setDiscount(event.target.value)}
             />
-          </div>
+          </div> */}
         </section>
       </div>
       <section className="flex  justify-between items-center">

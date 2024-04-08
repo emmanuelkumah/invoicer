@@ -1,43 +1,43 @@
 "use client";
-import { v4 as uuidv4 } from "uuid";
 
 import DisplayLogo from "./DisplayLogo";
-import InvoiceClient from "./FormFields/InvoiceClient";
-import InvoiceCurrency from "./FormFields/InvoiceCurrency";
-import InvoiceDate from "./FormFields/InvoiceDate";
-import InvoiceDueDate from "./FormFields/InvoiceDueDate";
-import InvoiceItem from "./FormFields/InvoiceItem";
-import InvoiceNumber from "./FormFields/InvoiceNumber";
-import InvoiceProvider from "./FormFields/InvoiceProvider";
+//import InvoiceItem from "./FormFields/InvoiceItem";
 import InvoiceTotal from "./FormFields/InvoiceTotal";
-import { Button, Modal } from "flowbite-react";
+import { Invoice, Item } from "@Interface";
+import { Button, Label, Select, TextInput } from "flowbite-react";
+import { IoCalendarNumber } from "react-icons/io5";
+import { FaRegUserCircle } from "react-icons/fa";
+import { PiNewspaperFill } from "react-icons/pi";
+import { AiOutlinePercentage } from "react-icons/ai";
 
 import { useState } from "react";
 import InvoiceModal from "./InvoiceModal";
 
-interface InvoiceItem {
-  description: string;
-  quantity: number;
-  cost: number;
-}
-
 const Form = () => {
-  const [invNumber, setInvNumber] = useState(1);
-  const [invDate, setInvDate] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [invoiceName, setInvoiceName] = useState<string>("");
-  const [selectedCurrency, setSelectedCurrency] = useState("$");
+  const [invoiceDetails, setInvoiceDetails] = useState<Invoice>({
+    number: "1",
+    date: "",
+    dueDate: "",
+    billFrom: "",
+    billTo: "",
+    currency: "",
+    tax: "",
+    discount: "",
+    invoiceItem: [
+      {
+        description: "",
+        quantity: 0,
+        cost: 0,
+      },
+    ],
+  });
+
+  console.log(invoiceDetails);
+
   const [tax, setTax] = useState<string>("");
   const [discount, setDiscount] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [businessDetails, setBusinessDetails] = useState({
-    serviceProvider: "",
-    client: "",
-  });
 
-  const [invItems, setInvItems] = useState<InvoiceItem[]>([
-    { description: "", quantity: 0, cost: 0 },
-  ]);
   const [isHovered, setIsHovered] = useState(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
 
@@ -45,10 +45,18 @@ const Form = () => {
     setSelectedImage(file);
   };
 
-  let submittedInvoiceDetails;
-
-  const handleAddNewInvoiceItem = () => {
-    setInvItems([...invItems, { description: "", quantity: 0, cost: 0 }]);
+  const addNewInvoiceItem = () => {
+    setInvoiceDetails({
+      ...invoiceDetails,
+      invoiceItem: [
+        ...invoiceDetails.invoiceItem,
+        {
+          description: "",
+          quantity: 0,
+          cost: 0,
+        },
+      ],
+    });
   };
 
   const handleDeleteInvoiceItem = (index: number) => {
@@ -61,22 +69,22 @@ const Form = () => {
     index: number
   ) => {
     const { name, value } = event.target;
+    const newInvoiceItem = [...invoiceDetails.invoiceItem];
 
-    setInvItems((prevItems) => {
-      const newItems = [...prevItems];
-      newItems[index] = {
-        ...newItems[index],
-        [name]: name === "quantity" || name === "cost" ? Number(value) : value,
-      };
-      return newItems;
-    });
+    const updatedItem = {
+      ...newInvoiceItem[index],
+      [name]: name === "quantity" || name === "cost" ? Number(value) : value,
+    };
+
+    newInvoiceItem[index] = updatedItem;
+    setInvoiceDetails({ ...invoiceDetails, invoiceItem: newInvoiceItem });
   };
 
   const calculateAmount = (invQuantity: number, invCost: number) => {
     return (invQuantity * invCost).toFixed(2);
   };
 
-  const subTotal = invItems.reduce((total, currItem) => {
+  const subTotal = invoiceDetails.invoiceItem.reduce((total, currItem) => {
     return total + currItem.cost * currItem.quantity;
   }, 0);
 
@@ -85,34 +93,23 @@ const Form = () => {
   const salesTaxAmount = (Number(tax) / 100) * subTotal;
   const totalAmountDue = totalAfterDiscount + salesTaxAmount;
 
-  const handleInvoiceSubmission = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    submittedInvoiceDetails = {
-      invDate: invDate,
-      invNumber: invNumber,
-      invItems: invItems,
-      businessDetails: businessDetails,
-    };
-    setOpenModal(true);
-  };
+  // const handleInvoiceSubmission = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   submittedInvoiceDetails = {
+  //     invDate: invDate,
+  //     invNumber: invNumber,
+  //     invItems: invItems,
+  //     businessDetails: businessDetails,
+  //   };
+  //   setOpenModal(true);
+  // };
 
   return (
     <>
       <form
         className="bg-white p-5 w-full rounded-lg drop-shadow-lg sm:w-[80%]"
-        onSubmit={(event) => handleInvoiceSubmission(event)}
+        // onSubmit={(event) => handleInvoiceSubmission(event)}
       >
-        <div className="grid place-items-center my-5">
-          <input
-            className="text-3xl border-0 text-center focus:outline-0"
-            type="text"
-            name=""
-            id=""
-            placeholder="Invoice"
-            value={invoiceName}
-            onChange={(e) => setInvoiceName(e.target.value)}
-          />
-        </div>
         <section className="grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 sm:grid-cols-5">
           {selectedImage ? (
             <div
@@ -150,97 +147,193 @@ const Form = () => {
           ) : (
             <DisplayLogo uploadCompanyLogo={uploadCompanyLogo} />
           )}
-          <InvoiceNumber invNumber={invNumber} setInvNumber={setInvNumber} />
+          <div>
+            <Label
+              htmlFor="number"
+              value="Invoice Number"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            />
 
-          <InvoiceDate invDate={invDate} setInvDate={setInvDate} />
-          <InvoiceDueDate dueDate={dueDate} setDueDate={setDueDate} />
-          <InvoiceCurrency
-            selectedCurrency={selectedCurrency}
-            setSelectedCurrency={setSelectedCurrency}
-          />
+            <TextInput
+              placeholder="invoice"
+              type="number"
+              autoFocus
+              min="1"
+              step="1"
+              id="number"
+              addon="#"
+              value={invoiceDetails.number}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInvoiceDetails({ ...invoiceDetails, number: e.target.value })
+              }
+            />
+          </div>
+
+          <div>
+            <Label
+              htmlFor="date"
+              value="Invoice Date"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            />
+
+            <TextInput
+              type="date"
+              autoFocus
+              min="2024-01-04"
+              id="date"
+              icon={IoCalendarNumber}
+              value={invoiceDetails.date}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInvoiceDetails({
+                  ...invoiceDetails,
+                  date: e.target.value,
+                })
+              }
+            />
+          </div>
+          <div>
+            <Label
+              htmlFor="due-date"
+              value="Due Date"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            />
+
+            <TextInput
+              type="date"
+              autoFocus
+              min="1"
+              step="1"
+              id="due-date"
+              icon={IoCalendarNumber}
+              value={invoiceDetails.dueDate}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setInvoiceDetails({
+                  ...invoiceDetails,
+                  dueDate: e.target.value,
+                })
+              }
+            />
+          </div>
+          <div>
+            <Label htmlFor="currency" value="Currency" />
+            <Select
+              id="currency"
+              required
+              value={invoiceDetails.currency}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setInvoiceDetails({
+                  ...invoiceDetails,
+                  currency: e.target.value,
+                })
+              }
+            >
+              <option defaultValue="US$">USD</option>
+              <option value="CA$">CAD</option>
+              <option value="£">GBP</option>
+              <option value="GH₵">GHS</option>
+            </Select>
+          </div>
         </section>
         <section>
           <h3 className="mt-9 pb-2">Business Details</h3>
 
           <div className="grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 sm:grid-cols-2">
-            <InvoiceProvider
-              businessDetails={businessDetails}
-              setBusinessDetails={setBusinessDetails}
-            />
-            <InvoiceClient
-              businessDetails={businessDetails}
-              setBusinessDetails={setBusinessDetails}
-            />
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="billFrom" value="Bill From" />
+              </div>
+              <TextInput
+                id="billFrom"
+                type="text"
+                icon={FaRegUserCircle}
+                placeholder="Who is this invoice from?"
+                value={invoiceDetails.billFrom}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setInvoiceDetails({
+                    ...invoiceDetails,
+                    billFrom: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="billTo" value="Bill To" />
+              </div>
+              <TextInput
+                id="billTo"
+                type="text"
+                icon={FaRegUserCircle}
+                placeholder="Who is this invoice to?"
+                value={invoiceDetails.billTo}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setInvoiceDetails({
+                    ...invoiceDetails,
+                    billTo: e.target.value,
+                  })
+                }
+              />
+            </div>
           </div>
         </section>
         <section>
           <h3 className="mt-9 pb-2">Item Details</h3>
-          {invItems.map((item, index) => (
+          {invoiceDetails.invoiceItem.map((item, index) => (
             <div
-              className="relative grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 mt-6 sm:grid-cols-6"
+              className="relative grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 mt-6 sm:grid-cols-4"
               key={index}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
             >
-              <div className="sm:col-span-3">
-                <label
-                  htmlFor="item"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Item
-                </label>
-                <input
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  type="text"
+              <div className="max-w-lg">
+                <div className="mb-2 block">
+                  <Label htmlFor="item" value="Item" />
+                </div>
+                <TextInput
                   id="item"
-                  required
+                  type="text"
+                  placeholder="Item Description"
                   name="description"
+                  required
+                  icon={PiNewspaperFill}
                   value={item.description}
                   onChange={(event) => handleInvoiceItemChange(event, index)}
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="quantity"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Quantity
-                </label>
-                <input
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  type="number"
-                  min="1"
-                  step="1"
+              <div className="max-w-sm">
+                <div className="mb-2 block">
+                  <Label htmlFor="quantity" value="Quantity" />
+                </div>
+                <TextInput
                   id="quantity"
+                  min="1"
+                  type="number"
                   name="quantity"
+                  required
                   value={item.quantity}
                   onChange={(event) => handleInvoiceItemChange(event, index)}
                 />
               </div>
               <div>
-                <label
-                  htmlFor="cost"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Cost
-                </label>
-                <input
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  type="number"
-                  min="1"
-                  step="1"
+                <div className="mb-2 block">
+                  <Label htmlFor="cost" value="Cost" />
+                </div>
+                <TextInput
                   id="cost"
+                  type="number"
                   name="cost"
+                  min="0"
+                  required
                   value={item.cost}
                   onChange={(event) => handleInvoiceItemChange(event, index)}
                 />
               </div>
               <div>
                 <h3>Amount</h3>
-                <h4>{`${selectedCurrency} ${calculateAmount(
-                  item.quantity,
-                  item.cost
-                )}`}</h4>
+                <h4>
+                  {`${invoiceDetails.currency} ${calculateAmount(
+                    item.quantity,
+                    item.cost
+                  )}`}
+                </h4>
               </div>
               {isHovered && (
                 <div
@@ -264,32 +357,62 @@ const Form = () => {
             </div>
           ))}
 
-          <button
-            className="bg-cyan-800 text-white p-2 rounded-lg mt-4"
-            onClick={handleAddNewInvoiceItem}
-          >
+          <Button onClick={addNewInvoiceItem} color="dark" className="my-4">
             Add Item
-          </button>
+          </Button>
         </section>
-        <InvoiceTotal
+        <section className="flex flex-col">
+          <div>
+            {`Subtotal is:  ${invoiceDetails.currency} ${subTotal.toFixed(2)}`}
+          </div>
+          <div>
+            <Label htmlFor="tax" value="Tax Percent" />
+
+            <TextInput
+              id="tax"
+              type="number"
+              icon={AiOutlinePercentage}
+              value={invoiceDetails.tax}
+              onChange={(event) =>
+                setInvoiceDetails({
+                  ...invoiceDetails,
+                  tax: event.target.value,
+                })
+              }
+            />
+          </div>
+          <div>
+            <Label htmlFor="discount" value="Discount Percent" />
+
+            <TextInput
+              id="discount"
+              type="number"
+              icon={AiOutlinePercentage}
+              value={invoiceDetails.discount}
+              onChange={(event) =>
+                setInvoiceDetails({
+                  ...invoiceDetails,
+                  discount: event.target.value,
+                })
+              }
+            />
+          </div>
+          <h3>{`Total Amount Due: ${invoiceDetails.currency}${totalAmountDue.toFixed(2)}`}</h3>
+        </section>
+
+        {/* <InvoiceTotal
           subTotal={subTotal}
-          selectedCurrency={selectedCurrency}
+          selectedCurrency={invoiceDetails.currency}
           tax={tax}
           setTax={setTax}
           discount={discount}
           setDiscount={setDiscount}
           totalAmount={totalAmountDue}
-        />
-        {/* <button className="bg-teal-500">Preview Invoice</button> */}
+        /> */}
       </form>
       <button onClick={() => setOpenModal(true)}>Preview invoice</button>
-      {/* <button
-        className="bg-cyan-900 rounded-xl p-3 text-white text-xl w-full sm:w-[20%]"
-        onClick={downloadInvoiceAsPDF}
-      >
-        Download Invoice{" "}
-      </button> */}
-      {openModal && (
+
+      {/* {openModal && (
         <InvoiceModal
           openModal={openModal}
           setOpenModal={setOpenModal}
@@ -305,7 +428,7 @@ const Form = () => {
           invDate={invDate}
           dueDate={dueDate}
         />
-      )}
+      )} */}
     </>
   );
 };
