@@ -6,6 +6,7 @@ import InvoiceTotal from "./FormFields/InvoiceTotal";
 import { Invoice, Item } from "@Interface";
 import { Button, Label, Select, TextInput } from "flowbite-react";
 import { IoCalendarNumber } from "react-icons/io5";
+import { TiDelete } from "react-icons/ti";
 import { FaRegUserCircle } from "react-icons/fa";
 import { PiNewspaperFill } from "react-icons/pi";
 import { AiOutlinePercentage } from "react-icons/ai";
@@ -32,10 +33,10 @@ const Form = () => {
     ],
   });
 
-  console.log(invoiceDetails);
+  // console.log(invoiceDetails);
 
-  const [tax, setTax] = useState<string>("");
-  const [discount, setDiscount] = useState<string>("");
+  // const [tax, setTax] = useState<string>("");
+  // const [discount, setDiscount] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const [isHovered, setIsHovered] = useState(false);
@@ -60,9 +61,14 @@ const Form = () => {
   };
 
   const handleDeleteInvoiceItem = (index: number) => {
-    const updatedItems = [...invItems];
+    const invoiceItems = invoiceDetails.invoiceItem;
+    const updatedItems = [...invoiceItems];
     updatedItems.splice(index, 1);
-    setInvItems(updatedItems);
+    setInvoiceDetails({
+      ...invoiceDetails,
+      invoiceItem: [...updatedItems],
+    });
+    //setInvItems(updatedItems);
   };
   const handleInvoiceItemChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -88,9 +94,9 @@ const Form = () => {
     return total + currItem.cost * currItem.quantity;
   }, 0);
 
-  const discountAmount = (Number(discount) / 100) * subTotal;
+  const discountAmount = (Number(invoiceDetails.discount) / 100) * subTotal;
   const totalAfterDiscount = subTotal - discountAmount;
-  const salesTaxAmount = (Number(tax) / 100) * subTotal;
+  const salesTaxAmount = (Number(invoiceDetails.tax) / 100) * subTotal;
   const totalAmountDue = totalAfterDiscount + salesTaxAmount;
 
   // const handleInvoiceSubmission = (e: React.FormEvent<HTMLFormElement>) => {
@@ -280,10 +286,12 @@ const Form = () => {
           <h3 className="mt-9 pb-2">Item Details</h3>
           {invoiceDetails.invoiceItem.map((item, index) => (
             <div
-              className="relative grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 mt-6 sm:grid-cols-4"
+              className="relative grid grid-cols-1 border-3 gap-4 border border-gray-300 rounded-lg p-4 mt-6 sm:grid-cols-6"
               key={index}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
             >
-              <div className="max-w-lg">
+              <div className="max-w-lg sm:col-span-3">
                 <div className="mb-2 block">
                   <Label htmlFor="item" value="Item" />
                 </div>
@@ -337,21 +345,10 @@ const Form = () => {
               </div>
               {isHovered && (
                 <div
-                  className="absolute right-[10%] top-2"
+                  className="absolute right-[5%] bottom-[5%] sm:top-[50%]"
                   onClick={() => handleDeleteInvoiceItem(index)}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="w-6 h-6 text-red-500"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <TiDelete size={30} color="red" />
                 </div>
               )}
             </div>
@@ -362,55 +359,54 @@ const Form = () => {
           </Button>
         </section>
         <section className="flex flex-col">
-          <div>
+          <div className="text-xl">
             {`Subtotal is:  ${invoiceDetails.currency} ${subTotal.toFixed(2)}`}
           </div>
-          <div>
-            <Label htmlFor="tax" value="Tax Percent" />
 
-            <TextInput
-              id="tax"
-              type="number"
-              icon={AiOutlinePercentage}
-              value={invoiceDetails.tax}
-              onChange={(event) =>
-                setInvoiceDetails({
-                  ...invoiceDetails,
-                  tax: event.target.value,
-                })
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="discount" value="Discount Percent" />
+          <div className="grid grid-col-1 sm:grid-cols-4 sm:gap-4">
+            <div>
+              <Label htmlFor="tax" value="Tax Percent" />
 
-            <TextInput
-              id="discount"
-              type="number"
-              icon={AiOutlinePercentage}
-              value={invoiceDetails.discount}
-              onChange={(event) =>
-                setInvoiceDetails({
-                  ...invoiceDetails,
-                  discount: event.target.value,
-                })
-              }
-            />
+              <TextInput
+                id="tax"
+                type="number"
+                icon={AiOutlinePercentage}
+                value={invoiceDetails.tax}
+                onChange={(event) =>
+                  setInvoiceDetails({
+                    ...invoiceDetails,
+                    tax: event.target.value,
+                  })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="discount" value="Discount Percent" />
+
+              <TextInput
+                id="discount"
+                type="number"
+                icon={AiOutlinePercentage}
+                value={invoiceDetails.discount}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setInvoiceDetails({
+                    ...invoiceDetails,
+                    discount: event.target.value,
+                  })
+                }
+              />
+            </div>
+            <h3 className="text-xl mt-5 col-span-2">
+              {`Total Amount Due: ${
+                invoiceDetails.currency
+              }${totalAmountDue.toFixed(2)}`}
+            </h3>
           </div>
-          <h3>{`Total Amount Due: ${invoiceDetails.currency}${totalAmountDue.toFixed(2)}`}</h3>
         </section>
-
-        {/* <InvoiceTotal
-          subTotal={subTotal}
-          selectedCurrency={invoiceDetails.currency}
-          tax={tax}
-          setTax={setTax}
-          discount={discount}
-          setDiscount={setDiscount}
-          totalAmount={totalAmountDue}
-        /> */}
       </form>
-      <button onClick={() => setOpenModal(true)}>Preview invoice</button>
+      <Button className="my-8" onClick={() => setOpenModal(true)}>
+        Preview invoice
+      </Button>
 
       {/* {openModal && (
         <InvoiceModal
@@ -428,7 +424,7 @@ const Form = () => {
           invDate={invDate}
           dueDate={dueDate}
         />
-      )} */}
+      )}  */}
     </>
   );
 };
